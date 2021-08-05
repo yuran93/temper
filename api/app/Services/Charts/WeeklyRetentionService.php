@@ -55,15 +55,21 @@ class WeeklyRetentionService extends AbstractHighchartService
         $labels = [];
         $series = [];
 
+        # Initial loop to get the series going.
+        # As we move forward with this it'll shift the time period by week.
         for($seriesNo = 0; $seriesNo < $monitoringPeriod; $seriesNo++) {
 
+            # This loop is to get the weekly data of a single series.
             for ($week = 0; $week < $noOfWeeks; $week++) {
 
+                # Lets get the name based on the series start date.
                 $name = (clone $startAt)->addWeeks($seriesNo)->toDateString();
 
+                # This will give us the exact period that we're looking for.
                 $periodStart = (clone $startAt)->addWeeks($seriesNo + $week)->toDateString();
                 $periodEnd = (clone $startAt)->addWeeks($seriesNo + $week + 1)->toDateString();
 
+                # Lets filter the stats out from out collection based on the period.
                 $percentage = $collection
                     ->whereBetween('created_at', [$periodStart, $periodEnd])
                     ->average('onboarding_perentage');
