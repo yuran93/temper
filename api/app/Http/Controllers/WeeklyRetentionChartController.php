@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\Charts\WeeklyRetentionService;
-use App\Services\Http\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use App\Services\ApiResponse;
 use Illuminate\Http\Request;
 
 class WeeklyRetentionChartController extends Controller
