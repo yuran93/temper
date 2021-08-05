@@ -17,17 +17,17 @@ Main work that I've done related to backend can be found at.
 - api/app/Http/Controllers
 - api/app/Models
 
-Main work that I've done related to backend can be found at.
+Main work that I've done vuejs can be found at.
 - web/src/views
 
 ## Unit testing
 
-Run following to get into api container
+Run following to get into api container.
 ```shell
 docker-compose exec api bash
 ```
 
-Run following to execute PhpUNIT
+Run following to inside the container.
 ```shell
 vendor/bin/phpunit
 ```
