@@ -8,11 +8,11 @@ use Carbon\Carbon;
 
 class WeeklyRetentionService extends AbstractHighchartService
 {
-    protected $signupTrackingRepository;
+    protected $repository;
 
-    public function __construct(SignupTrackingRepository $signupTrackingRepository)
+    public function __construct(SignupTrackingRepository $repository)
     {
-        $this->signupTrackingRepository = $signupTrackingRepository;
+        $this->repository = $repository;
     }
 
     public function getChartData(array $params = []): array
@@ -20,7 +20,7 @@ class WeeklyRetentionService extends AbstractHighchartService
         $startDate = Arr::get($params, 'start_date');
         $noOfWeeks = Arr::get($params, 'no_of_weeks', 12);
 
-        $collection = $this->signupTrackingRepository->getAll();
+        $collection = $this->repository->getAll();
 
         $startAt = Carbon::parse($startDate);
 
