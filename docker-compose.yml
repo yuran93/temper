@@ -1,0 +1,46 @@
+version: "3.7"
+
+services:
+  api:
+    build:
+      args:
+        user: temper
+        uid: 1000
+      context: ./api
+      dockerfile: Dockerfile
+    image: temper
+    container_name: temper-api
+    restart: unless-stopped
+    working_dir: /var/www/
+    # command: bash -c 'composer dump-autoload && composer install && php artisan migrate'
+    volumes:
+      - ./api:/var/www
+    networks:
+      - temper
+
+  nginx:
+    image: nginx:alpine
+    container_name: temper-nginx
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./api:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      - temper
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    container_name: temper-web
+    volumes:
+      - ./web:/usr/src/app/web
+      - /usr/src/app/web/node_modules
+
+networks:
+  temper:
+    driver: bridge
