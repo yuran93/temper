@@ -2,9 +2,6 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
-use App\Repositories\Contracts\SignupTrackingRepository;
-use App\Services\Charts\WeeklyRetentionService;
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -16,22 +13,8 @@ use App\Services\Charts\WeeklyRetentionService;
 |
 */
 
-$router->get('/test', function() {
-    return ['test'];
-});
+$router->get('/api/weekly-retention', 'WeeklyRetentionChartController');
 
 $router->get('/', function () use ($router) {
-
-    $ser = app(WeeklyRetentionService::class);
-
-    return $ser->getChartData(['start_date' => '2016-07-19']);
-
-    $repo = app(SignupTrackingRepository::class);
-
-    $data = $repo->getAll();
-
-    return $data->whereBetween('created_at', ['2016-07-20', '2016-07-21']);
-
-
-    return 'hello world';
+    return $router->app->version();
 });
