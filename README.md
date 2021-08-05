@@ -1,6 +1,6 @@
 # Temper Assignment
 
-## Building and started the docker container
+## Building and starting the docker container
 
 ```shell
 docker-compose up
