@@ -3,6 +3,7 @@
 namespace App\Services\Charts;
 
 use App\Repositories\Contracts\SignupTrackingRepository;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Arr;
 use Carbon\Carbon;
 
@@ -17,22 +18,51 @@ class WeeklyRetentionService extends AbstractHighchartService
 
     public function getChartData(array $params = []): array
     {
-        $startDate = Arr::get($params, 'start_date');
+        # No of weeks for the x axies.
         $noOfWeeks = Arr::get($params, 'no_of_weeks', 12);
+
+        $startDate = Arr::get($params, 'start_date');
+        $endDate = Arr::get($params, 'end_date');
+
+        if ( !$startDate || !$endDate ) {
+            throw new \Exception('Missing mandatory params: start_date, end_date');
+        }
+
+        # Lets create Carbon objects from the dates.
+        $startAt = Carbon::parse($startDate);
+        $endAt = Carbon::parse($endDate);
+
+        $monitoringPeriod = $startAt->diffInWeeks($endAt);
+
+        if ( $monitoringPeriod < 1 ) {
+            throw new \Exception('Invalid date period');
+        }
 
         $collection = $this->repository->getAll();
 
-        $startAt = Carbon::parse($startDate);
+        list($series, $labels) = $this->getSeriesAndLabelData($collection, $startAt, $monitoringPeriod, $noOfWeeks);
 
+        return $this->getChartOptions(
+            'WEEKLY RETENTION CURVES - MIXPANEL DATA', 'Weeks',
+            'Retention Percentage',
+            $labels,
+            $series
+        );
+    }
+
+    public function getSeriesAndLabelData(Collection $collection, Carbon $startAt, int $monitoringPeriod, $noOfWeeks): array
+    {
         $labels = [];
         $series = [];
 
-        for($seriesNo = 0; $seriesNo < 1; $seriesNo++) {
+        for($seriesNo = 0; $seriesNo < $monitoringPeriod; $seriesNo++) {
 
             for ($week = 0; $week < $noOfWeeks; $week++) {
 
-                $periodStart = (clone $startAt)->addWeeks($week)->toDateString();
-                $periodEnd = (clone $startAt)->addWeeks($week + 1)->toDateString();
+                $name = (clone $startAt)->addWeeks($seriesNo)->toDateString();
+
+                $periodStart = (clone $startAt)->addWeeks($seriesNo + $week)->toDateString();
+                $periodEnd = (clone $startAt)->addWeeks($seriesNo + $week + 1)->toDateString();
 
                 $percentage = $collection
                     ->whereBetween('created_at', [$periodStart, $periodEnd])
@@ -43,18 +73,16 @@ class WeeklyRetentionService extends AbstractHighchartService
                     $labels[] = ($week + 1) . ' Weeks Later' . " {$periodStart}";
                 }
 
-                $series[$seriesNo]['name'] = $periodStart;
+                $series[$seriesNo]['name'] = $name;
                 $series[$seriesNo]['data'][] = $percentage ?? 0;
             }
 
         }
 
-        return $this->getChartOptions(
-            'WEEKLY RETENTION CURVES - MIXPANEL DATA', 'Weeks',
-            'Retention Percentage',
+        return [
+            $series,
             $labels,
-            $series
-        );
+        ];
     }
 
 }

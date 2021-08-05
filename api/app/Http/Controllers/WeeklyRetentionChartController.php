@@ -26,8 +26,9 @@ class WeeklyRetentionChartController extends Controller
     public function __invoke(): JsonResponse
     {
         $startDate = $this->request->get('start_date', '2016-07-19');
+        $endDate = $this->request->get('end_date', '2016-09-19');
 
-        $data =  $this->service->getChartData(['start_date' => $startDate]);
+        $data =  $this->service->getChartData(['start_date' => $startDate, 'end_date' => $endDate]);
 
         return $this->response->success($data);
     }
