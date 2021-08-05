@@ -59,6 +59,12 @@ class WeeklyRetentionService extends AbstractHighchartService
         # As we move forward with this it'll shift the time period by week.
         for($seriesNo = 0; $seriesNo < $monitoringPeriod; $seriesNo++) {
 
+            # Just to get X = 0; Y = 100
+            $series[$seriesNo]['data'][] = 100;
+            if ( $seriesNo == 0 ) {
+                $labels[] = '0 Weeks Lates';
+            }
+
             # This loop is to get the weekly data of a single series.
             for ($week = 0; $week < $noOfWeeks; $week++) {
 
