@@ -86,6 +86,7 @@ class WeeklyRetentionService extends AbstractHighchartService
                 # Gets the count of users who are still in or been on this step.
                 $stepUserCount = $seriesDataset->where('onboarding_perentage', '>=', $onboardingPercentage)->count();
 
+                $series[$seriesNo]['type'] = 'spline';
                 $series[$seriesNo]['name'] = $periodStart;
                 $series[$seriesNo]['data'][] = ($seriesUserCount ? $stepUserCount / $seriesUserCount : 0) * 100;
 
