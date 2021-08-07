@@ -73,7 +73,7 @@ class WeeklyRetentionService extends AbstractHighchartService
 
             # This will give us the exact period that we're looking for.
             $periodStart = (clone $startAt)->addWeeks($seriesNo)->toDateString();
-            $periodEnd = (clone $startAt)->addWeeks($seriesNo + 1)->toDateString();
+            $periodEnd = (clone $startAt)->addWeeks($seriesNo + 1)->subDay()->toDateString();
 
             # Lets get the dataset belongs to that perticular series ( Week from here ).
             $seriesDataset = $this->dataset->whereBetween('created_at', [$periodStart, $periodEnd]);
