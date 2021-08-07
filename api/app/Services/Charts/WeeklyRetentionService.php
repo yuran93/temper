@@ -38,6 +38,7 @@ class WeeklyRetentionService extends AbstractHighchartService
             throw new \Exception('Invalid date period');
         }
 
+        # Lets fetch the data for the chart here.
         $this->dataset = $this->repository->getAll();
 
         list($series, $labels) = $this->getSeriesAndLabelData($startAt, $monitoringPeriod, $noOfWeeks);
@@ -52,8 +53,6 @@ class WeeklyRetentionService extends AbstractHighchartService
 
     public function getSeriesAndLabelData(Carbon $startAt, int $monitoringPeriod, $noOfWeeks): array
     {
-        $series = [];
-
         $onboardingPercentages = [
             0 => 'Create account',
             20 => 'Activate account',
@@ -66,6 +65,8 @@ class WeeklyRetentionService extends AbstractHighchartService
         ];
 
         $labels = array_values($onboardingPercentages);
+
+        $series = [];
 
         # As we move forward with the series it'll shift the time period by week.
         for($seriesNo = 0; $seriesNo < $monitoringPeriod; $seriesNo++) {
@@ -86,9 +87,10 @@ class WeeklyRetentionService extends AbstractHighchartService
                 # Gets the count of users who are still in or been on this step.
                 $stepUserCount = $seriesDataset->where('onboarding_perentage', '>=', $onboardingPercentage)->count();
 
+                # Filling up the series data.
                 $series[$seriesNo]['type'] = 'spline';
                 $series[$seriesNo]['name'] = $periodStart;
-                $series[$seriesNo]['data'][] = ($seriesUserCount ? $stepUserCount / $seriesUserCount : 0) * 100;
+                $series[$seriesNo]['data'][] = round(($seriesUserCount ? $stepUserCount / $seriesUserCount : 0) * 100, 2);
 
             }
 
