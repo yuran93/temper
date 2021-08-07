@@ -54,7 +54,7 @@ class WeeklyRetentionService extends AbstractHighchartService
     {
         $series = [];
 
-        $labels = $onboardingPercentages = [
+        $onboardingPercentages = [
             0 => 'Create account',
             20 => 'Activate account',
             40 => 'Provide profile information',
@@ -64,6 +64,8 @@ class WeeklyRetentionService extends AbstractHighchartService
             99 => 'Waiting for approval',
             100 => 'Approval',
         ];
+
+        $labels = array_values($onboardingPercentages);
 
         # As we move forward with the series it'll shift the time period by week.
         for($seriesNo = 0; $seriesNo < $monitoringPeriod; $seriesNo++) {
@@ -79,10 +81,10 @@ class WeeklyRetentionService extends AbstractHighchartService
             $seriesUserCount = $seriesDataset->count();
 
             # This loop is to get the weekly data of a single series.
-            foreach ($onboardingPercentages as $onboardingPercentage) {
+            foreach ($onboardingPercentages as $onboardingPercentage => $onboardingPercentageLabel) {
 
                 # Gets the count of users who are still in or been on this step.
-                $stepUserCount = $seriesDataset->where('onboarding_perentage', '>', $onboardingPercentage)->count();
+                $stepUserCount = $seriesDataset->where('onboarding_perentage', '>=', $onboardingPercentage)->count();
 
                 $series[$seriesNo]['name'] = $periodStart;
                 $series[$seriesNo]['data'][] = ($seriesUserCount ? $stepUserCount / $seriesUserCount : 0) * 100;
