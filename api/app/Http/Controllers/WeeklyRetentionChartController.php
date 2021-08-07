@@ -6,6 +6,7 @@ use App\Services\Charts\WeeklyRetentionService;
 use Illuminate\Http\JsonResponse;
 use App\Services\ApiResponse;
 use Illuminate\Http\Request;
+use Exception;
 
 class WeeklyRetentionChartController extends Controller
 {
@@ -33,7 +34,7 @@ class WeeklyRetentionChartController extends Controller
 
             return $this->response->success($data);
         }
-        catch(\Exception $exception) {
+        catch(Exception $exception) {
             return $this->response->failed($exception->getMessage());
         }
     }
