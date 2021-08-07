@@ -3,13 +3,13 @@
 namespace App\Services\Charts;
 
 use App\Repositories\Contracts\SignupTrackingRepository;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Arr;
 use Carbon\Carbon;
 
 class WeeklyRetentionService extends AbstractHighchartService
 {
     protected $repository;
+    protected $dataset;
 
     public function __construct(SignupTrackingRepository $repository)
     {
@@ -38,9 +38,9 @@ class WeeklyRetentionService extends AbstractHighchartService
             throw new \Exception('Invalid date period');
         }
 
-        $collection = $this->repository->getAll();
+        $this->dataset = $this->repository->getAll();
 
-        list($series, $labels) = $this->getSeriesAndLabelData($collection, $startAt, $monitoringPeriod, $noOfWeeks);
+        list($series, $labels) = $this->getSeriesAndLabelData($startAt, $monitoringPeriod, $noOfWeeks);
 
         return $this->getChartOptions(
             'WEEKLY RETENTION CURVES - MIXPANEL DATA', 'Weeks',
@@ -50,43 +50,43 @@ class WeeklyRetentionService extends AbstractHighchartService
         );
     }
 
-    public function getSeriesAndLabelData(Collection $collection, Carbon $startAt, int $monitoringPeriod, $noOfWeeks): array
+    public function getSeriesAndLabelData(Carbon $startAt, int $monitoringPeriod, $noOfWeeks): array
     {
-        $labels = [];
         $series = [];
 
-        # Initial loop to get the series going.
-        # As we move forward with this it'll shift the time period by week.
+        $labels = $onboardingPercentages = [
+            0 => 'Create account',
+            20 => 'Activate account',
+            40 => 'Provide profile information',
+            50 => 'What jobs are you interested in?',
+            70 => 'Do you have relevant experience in these jobs?',
+            90 => 'Are you a freelancer?',
+            99 => 'Waiting for approval',
+            100 => 'Approval',
+        ];
+
+        # As we move forward with the series it'll shift the time period by week.
         for($seriesNo = 0; $seriesNo < $monitoringPeriod; $seriesNo++) {
 
-            # Just to get X = 0; Y = 100
-            $series[$seriesNo]['data'][] = 100;
-            if ( $seriesNo == 0 ) {
-                $labels[] = '0 Weeks Lates';
-            }
+            # This will give us the exact period that we're looking for.
+            $periodStart = (clone $startAt)->addWeeks($seriesNo)->toDateString();
+            $periodEnd = (clone $startAt)->addWeeks($seriesNo + 1)->toDateString();
+
+            # Lets get the dataset belongs to that perticular series ( Week from here ).
+            $seriesDataset = $this->dataset->whereBetween('created_at', [$periodStart, $periodEnd]);
+
+            # Gets the total user count for that series.
+            $seriesUserCount = $seriesDataset->count();
 
             # This loop is to get the weekly data of a single series.
-            for ($week = 0; $week < $noOfWeeks; $week++) {
+            foreach ($onboardingPercentages as $onboardingPercentage) {
 
-                # Lets get the name based on the series start date.
-                $name = (clone $startAt)->addWeeks($seriesNo)->toDateString();
+                # Gets the count of users who are still in or been on this step.
+                $stepUserCount = $seriesDataset->where('onboarding_perentage', '>', $onboardingPercentage)->count();
 
-                # This will give us the exact period that we're looking for.
-                $periodStart = (clone $startAt)->addWeeks($seriesNo + $week)->toDateString();
-                $periodEnd = (clone $startAt)->addWeeks($seriesNo + $week + 1)->toDateString();
+                $series[$seriesNo]['name'] = $periodStart;
+                $series[$seriesNo]['data'][] = ($seriesUserCount ? $stepUserCount / $seriesUserCount : 0) * 100;
 
-                # Lets filter the stats out from out collection based on the period.
-                $percentage = $collection
-                    ->whereBetween('created_at', [$periodStart, $periodEnd])
-                    ->average('onboarding_perentage');
-
-                # Just need to fill up one time for a labels.
-                if ( $seriesNo == 0 ) {
-                    $labels[] = ($week + 1) . ' Weeks Later' . " {$periodStart}";
-                }
-
-                $series[$seriesNo]['name'] = $name;
-                $series[$seriesNo]['data'][] = $percentage ?? 0;
             }
 
         }
