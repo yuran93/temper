@@ -1,5 +1,7 @@
 # Temper Assignment
 
+![alt text](https://github.com/yuran93/temper/blob/master/screenshot.jpg?raw=true)
+
 ## Building and starting the docker container
 
 ```shell
