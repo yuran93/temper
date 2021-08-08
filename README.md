@@ -1,6 +1,6 @@
 # Temper Assignment
 
-![alt text](https://github.com/yuran93/temper/blob/master/screenshot.jpg?raw=true)
+![alt text](https://github.com/yuran93/temper/blob/master/screenshot.png?raw=true)
 
 ## Building and starting the docker container
 
@@ -66,7 +66,7 @@ Failed Response
 ```json
 {
     "success": false,
-    "message": ...,
+    "message": "Error Message",
     "status": 500
 }
 ```
